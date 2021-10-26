@@ -20,7 +20,9 @@
       padding: 0;
 
       width: 100vw;
-      height: 100vh;
+      min-height: 100vh;
+
+      overflow-x: hidden;
 
       font-family: 'Helvetica', sans-serif;
     }
@@ -28,31 +30,88 @@
       max-width: 30rem;
       text-align: center;
     }
+    a{
+      color: inherit;
+      margin: .4rem 0;
+    }
+    li{ padding: .1rem; }
   </style>
 </head>
 <body>
-  <iframe
-    width="560"
-    height="315"
-    src="https://www.youtube.com/embed/NcGnLdUPnpo"
-    title="YouTube video player"
-    frameborder="0"
-    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-    allowfullscreen
-  ></iframe>
+  <br/><br/>
+  <div id="player"></div>
+  <div style="margin-top: 1rem;">
+    <strong>Duração: </strong> <span id="video-duration"></span>
+  </div>
 
   <p>
     Precisamos conseguir capturar a duração desse vídeo, e criar uma função que será disparada quando o vídeo encerrar.<br/>
     Para resolução desse problema pode ser usado JavaScript e JQuery.<br/>
   </p>
 
-  <a href="https://watch.screencastify.com/v/FXexedMysMzoX3K6u5ck" style="color: inherit;" target="_blank">
+  <a href="https://watch.screencastify.com/v/FXexedMysMzoX3K6u5ck" target="_blank">
     <strong>
       CLIQUE AQUI PARA INSTRUÇÕES
     </strong>
   </a>
 
+  <hr style="width: calc(100% - 3rem); margin: 3rem 0 1rem;"/>
+
+  <h3>Problema solucionado</h3>
+  <ul>
+    <li>Iframe substituido por API do youtube</li>
+    <li>Função <b>onReady</b>(Para saber quando o video foi carregado)</li>
+    <li>Função <b>onStateChange</b>(Para observar as mudanças no player)</li>
+    <li><b>getDuration</b> para pegar a duração após o video ser carregado</li>
+    <li><b>YT.PlayerState.ENDED</b> dentro da função <b>onStateChange</b> para saber se acabou</li>
+  </ul>
+  <p>Valeu Anderson!</p>
+  <a href="https://qastack.com.br/programming/7853904/how-to-detect-when-a-youtube-video-finishes-playing" target="_blank">Link de Referência</a>
+  <a href="https://developers.google.com/youtube/iframe_api_reference?csw=1" target="_blank">Documentação API Youtube</a>
   <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
-  <script></script>
+  <script>
+    var tag = document.createElement('script');
+
+    tag.src = "https://www.youtube.com/iframe_api";
+    var firstScriptTag = document.getElementsByTagName('script')[0];
+    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+    var player;
+    function onYouTubeIframeAPIReady() {
+      player = new YT.Player('player', {
+        height: '360',
+        width: '640',
+        videoId: 'NcGnLdUPnpo',
+        events: {
+          'onReady': onPlayerReady,
+          'onStateChange': onPlayerStateChange
+        }
+      });
+    }
+
+    function onPlayerReady(event) {
+      event.target.playVideo();
+      $('#video-duration').html(handleTime(event.target.getDuration()));
+    }
+
+    function onPlayerStateChange(event) {
+      if (event.data == YT.PlayerState.ENDED) {
+        alert('Acabou');
+      }
+    }
+
+    function handleTime(totalSeconds){
+      hours = Math.floor(totalSeconds / 3600);
+      totalSeconds %= 3600;
+      minutes = Math.floor(totalSeconds / 60);
+      seconds = totalSeconds % 60;
+
+      let final = "";
+      if(hours > 0) final = `${hours}h `;
+      if(minutes > 0) final+= `${minutes}min `;
+      if(seconds > 0) final+= `${seconds}s`;
+      return final;
+    }
+  </script>
 </body>
 </html>
